@@ -1,0 +1,6 @@
+{
+  "name": "Global Agronomy & Trade Intelligence System",
+  "description": "Professional agricultural intelligence system providing historical production analysis (up to 2023) and machine learning forecasts (2027 to 2031) on global crops.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

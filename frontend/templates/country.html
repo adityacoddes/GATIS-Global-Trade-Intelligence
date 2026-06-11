@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATIS — Country Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/shared.css">
+    <style>
+        .two-col-country { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        @media (max-width: 860px) { .two-col-country { grid-template-columns: 1fr; } }
+
+        /* Sparkline chart styles */
+        .sparkline-wrap { width: 100%; overflow-x: auto; }
+        .sparkline-svg { display: block; }
+
+        /* History chart */
+        #historyChart { width: 100%; height: 220px; position: relative; }
+        .chart-canvas { width: 100%; height: 100%; }
+
+        /* Trend pill */
+        .trend-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
+        .trend-up { background: #dcfce7; color: #166534; }
+        .trend-down { background: #fef2f2; color: #991b1b; }
+        .trend-flat { background: var(--surface-3); color: var(--text-muted); }
+
+        /* Peak highlight row */
+        tr.peak-row td { background: rgba(201,168,76,0.08); font-weight: 500; }
+        tr.peak-row td.rank::after { content: ' ★'; color: var(--gold); }
+
+        /* Country search hint */
+        .country-hint { font-size: 11px; color: var(--text-hint); margin-top: 4px; }
+
+        /* Profile summary bar */
+        .profile-bar { background: linear-gradient(135deg, var(--green-900), var(--green-700)); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; color: #fff; margin-bottom: 1.25rem; display: none; }
+        .profile-bar-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 0.75rem; }
+        .profile-bar-stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+        .profile-stat { }
+        .profile-stat-val { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 500; }
+        .profile-stat-label { font-size: 11px; color: var(--green-200); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+
+        /* Comparison table column */
+        td.forecast-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; color: #92650a; background: var(--gold-light); border-radius: 4px; padding: 2px 6px; }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <a class="topbar-brand" href="/">
+        <div class="topbar-logo">G</div>
+        <div>
+            <div class="topbar-name">GATIS</div>
+            <div class="topbar-sub">Global Agricultural Trade Intelligence</div>
+        </div>
+    </a>
+    <nav class="topbar-nav">
+        <a href="/">Home</a>
+        <a href="/map">Global Map</a>
+        <a href="/country" class="active">Country</a>
+        <a href="/forecast">Forecast</a>
+    </nav>
+    <div class="topbar-meta">FAOSTAT · 1961–2031</div>
+</header>
+
+<main class="page">
+
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1>Country <span>Intelligence</span></h1>
+            <p>Agricultural profiles · Top crop rankings · Crop production histories · Decade benchmarks</p>
+        </div>
+        <div class="page-badge badge-live">Live API</div>
+    </div>
+
+    <!-- COUNTRY SEARCH STRIP -->
+    <div class="section-label">Country Search</div>
+    <div class="control-strip">
+        <div class="control-group">
+            <div class="control-label">Country</div>
+            <input id="countryInput" type="text" list="countryOptions" placeholder="e.g. India, Brazil, China, United States…" style="width:100%;padding:8px 12px;font-size:14px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text-primary);outline:none;transition:border-color var(--transition),box-shadow var(--transition);">
+            <datalist id="countryOptions"></datalist>
+            <div class="country-hint">Type a country name or partial match — the API supports fuzzy search</div>
+        </div>
+        <div class="control-group narrow">
+            <div class="control-label">Year</div>
+            <select id="yearInput"><option value="">—</option></select>
+        </div>
+        <div class="control-group narrow">
+            <div class="control-label">Limit</div>
+            <select id="limitInput">
+                <option value="5">Top 5</option>
+                <option value="10" selected>Top 10</option>
+                <option value="20">Top 20</option>
+                <option value="50">Top 50</option>
+            </select>
+        </div>
+        <div><button class="btn btn-primary" id="topCropsBtn" type="button" disabled>Top Crops</button></div>
+    </div>
+
+    <!-- PROFILE BAR (shown after top crops load) -->
+    <div class="profile-bar" id="profileBar">
+        <div class="profile-bar-title" id="profileTitle">—</div>
+        <div class="profile-bar-stats" id="profileStats"></div>
+    </div>
+
+    <!-- TOP CROPS RESULT -->
+    <div class="two-col-country">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon">🌾</div>
+                    <div>
+                        <div class="card-title">Top Crops by Production</div>
+                        <div class="card-subtitle">Ranked by output for selected country &amp; year</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="topCropsResult">
+                <p class="placeholder-msg">Search a country and click Top Crops.</p>
+            </div>
+        </div>
+
+        <!-- CROP BREAKDOWN CHART (SVG bars) -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon">📊</div>
+                    <div>
+                        <div class="card-title">Portfolio Breakdown</div>
+                        <div class="card-subtitle">Production share within selected country</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="breakdownResult">
+                <p class="placeholder-msg">Top Crops will populate this chart.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CROP HISTORY SECTION -->
+    <div class="section-label">Crop Production History</div>
+    <div class="control-strip">
+        <div class="control-group">
+            <div class="control-label">Country (reuse from above or enter new)</div>
+            <input id="historyCountryInput" type="text" list="countryOptions" placeholder="e.g. India" style="width:100%;padding:8px 12px;font-size:14px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text-primary);outline:none;transition:border-color var(--transition),box-shadow var(--transition);">
+        </div>
+        <div class="control-group">
+            <div class="control-label">Crop</div>
+            <input id="cropInput" type="text" list="cropOptions" placeholder="e.g. Wheat, Rice…">
+            <datalist id="cropOptions"></datalist>
+        </div>
+        <div><button class="btn btn-secondary" id="historyBtn" type="button" disabled>Load History</button></div>
+    </div>
+
+    <!-- HISTORY RESULTS -->
+    <div class="two-col-country">
+        <!-- HISTORY TABLE -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon">📅</div>
+                    <div>
+                        <div class="card-title">Year-by-Year Record</div>
+                        <div class="card-subtitle">★ marks the peak production year</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="historyTableResult">
+                <p class="placeholder-msg">Load a crop history to see the record.</p>
+            </div>
+        </div>
+
+        <!-- HISTORY STATS -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon gold">📈</div>
+                    <div>
+                        <div class="card-title">Production Intelligence</div>
+                        <div class="card-subtitle">Peak · trend · growth analysis</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="historyStatsResult">
+                <p class="placeholder-msg">Load a crop history to see analytics.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DECADE BENCHMARK -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-left">
+                <div class="card-icon blue">🔢</div>
+                <div>
+                    <div class="card-title">Decade Benchmarks</div>
+                    <div class="card-subtitle">Average production per decade · compare eras of output</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" id="decadeResult">
+            <p class="placeholder-msg">Load a crop history to see decade averages.</p>
+        </div>
+    </div>
+
+</main>
+
+<footer class="page-footer">GATIS · <span>Country Intelligence</span> · Data: FAOSTAT · <a href="index.html" style="color:var(--green-400);">← All modules</a></footer>
+
+<script>
+const API = "http://127.0.0.1:8000";
+const fmt = v => Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
+const fmtShort = v => {
+    const n = Number(v);
+    if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+    if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+    return fmt(v);
+};
+
+async function getJson(path, params) {
+    const q = new URLSearchParams(params);
+    const res = await fetch(`${API}${path}?${q}`);
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Error ${res.status}`); }
+    return res.json();
+}
+
+/* ── TOP CROPS ───────────────────────────────────────────────────────────── */
+async function loadTopCrops() {
+    const country = document.getElementById('countryInput').value.trim();
+    const year    = document.getElementById('yearInput').value;
+    const limit   = document.getElementById('limitInput').value;
+    const el      = document.getElementById('topCropsResult');
+    if (!country || !year) { el.innerHTML = '<div class="error-msg">Enter a country and select a year.</div>'; return; }
+
+    el.innerHTML = `<p class="placeholder-msg"><span class="loading-dots"><span></span><span></span><span></span></span>&nbsp;Loading…</p>`;
+    document.getElementById('breakdownResult').innerHTML = `<p class="placeholder-msg"><span class="loading-dots"><span></span><span></span><span></span></span>&nbsp;Loading…</p>`;
+
+    try {
+        const data = await getJson('/api/country/top-crops', { country, year, limit });
+        const rows = data.top_crops;
+        const maxProd = rows[0]?.Production_Value || 1;
+        const isForecast = parseInt(year) >= 2024;
+
+        // Profile bar
+        const profileBar = document.getElementById('profileBar');
+        profileBar.style.display = '';
+        document.getElementById('profileTitle').textContent = `${data.matched_countries.join(', ')} · ${year}${isForecast ? ' (ML Forecast)' : ''}`;
+        document.getElementById('profileStats').innerHTML = `
+            <div class="profile-stat"><div class="profile-stat-val">${fmtShort(data.total_production)} t</div><div class="profile-stat-label">Total output</div></div>
+            <div class="profile-stat"><div class="profile-stat-val">${data.total_records}</div><div class="profile-stat-label">Crop types tracked</div></div>
+            <div class="profile-stat"><div class="profile-stat-val">${rows[0]?.Item || '—'}</div><div class="profile-stat-label">Top crop</div></div>
+            <div class="profile-stat"><div class="profile-stat-val">${fmt(rows[0]?.Country_Share || 0)}%</div><div class="profile-stat-label">Top crop share</div></div>`;
+
+        // Table
+        const rowsHtml = rows.map(r => `
+            <tr>
+                <td class="rank">${r.Rank}</td>
+                <td>${r.Item}</td>
+                <td class="num">${fmtShort(r.Production_Value)}</td>
+                <td>${r.Unit}</td>
+                <td class="share-bar-cell">
+                    <div class="share-bar-wrap">
+                        <div class="share-bar-bg"><div class="share-bar-fill" style="width:${Math.min(100,(r.Production_Value/maxProd)*100).toFixed(1)}%"></div></div>
+                        <span class="share-pct">${fmt(r.Country_Share)}%</span>
+                    </div>
+                </td>
+            </tr>`).join('');
+        el.innerHTML = `
+            <div class="result-label">${rows.length} crops · <strong>${data.matched_countries.join(', ')}</strong> · ${year}</div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>#</th><th>Crop</th><th>Production</th><th>Unit</th><th>Portfolio Share</th></tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table></div>`;
+
+        // SVG portfolio breakdown
+        renderPortfolioChart(rows, maxProd);
+
+        // Sync history country
+        document.getElementById('historyCountryInput').value = country;
+
+    } catch(e) {
+        el.innerHTML = `<div class="error-msg">${e.message}</div>`;
+        document.getElementById('breakdownResult').innerHTML = `<div class="error-msg">${e.message}</div>`;
+    }
+}
+
+function renderPortfolioChart(rows, maxProd) {
+    const el = document.getElementById('breakdownResult');
+    const barH = 22, gap = 6, labelW = 130, barMaxW = 180, valW = 60;
+    const svgH = rows.length * (barH + gap) + 10;
+    const svgW = labelW + barMaxW + valW + 20;
+
+    let bars = '';
+    rows.forEach((r, i) => {
+        const y = i * (barH + gap);
+        const w = Math.max(2, (r.Production_Value / maxProd) * barMaxW);
+        const hue = i === 0 ? 'var(--green-600)' : i < 3 ? 'var(--green-400)' : 'var(--green-200)';
+        const label = r.Item.length > 18 ? r.Item.slice(0,17)+'…' : r.Item;
+        bars += `
+            <text x="${labelW-6}" y="${y + barH*0.72}" text-anchor="end" font-size="11" fill="var(--text-muted)" font-family="DM Sans,sans-serif">${label}</text>
+            <rect x="${labelW}" y="${y+2}" width="${w}" height="${barH-4}" rx="3" fill="${hue}"/>
+            <text x="${labelW+w+5}" y="${y + barH*0.72}" font-size="11" fill="var(--text-secondary)" font-family="DM Mono,monospace">${fmtShort(r.Production_Value)}</text>`;
+    });
+
+    el.innerHTML = `<div class="sparkline-wrap"><svg class="sparkline-svg" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">${bars}</svg></div>`;
+}
+
+/* ── CROP HISTORY ────────────────────────────────────────────────────────── */
+async function loadHistory() {
+    const country = document.getElementById('historyCountryInput').value.trim();
+    const crop    = document.getElementById('cropInput').value;
+    const tEl     = document.getElementById('historyTableResult');
+    const sEl     = document.getElementById('historyStatsResult');
+    const dEl     = document.getElementById('decadeResult');
+
+    if (!country || !crop) { tEl.innerHTML = '<div class="error-msg">Enter a country and select a crop.</div>'; return; }
+    [tEl, sEl, dEl].forEach(e => e.innerHTML = `<p class="placeholder-msg"><span class="loading-dots"><span></span><span></span><span></span></span>&nbsp;Loading…</p>`);
+
+    try {
+        const data = await getJson('/api/country/crop-history', { country, crop });
+        const history = data.history;
+        const peakYear = data.peak_year;
+
+        // ── TABLE
+        const rowsHtml = history.map(r => {
+            const isPeak = r.Year === peakYear;
+            return `<tr class="${isPeak ? 'peak-row' : ''}">
+                <td class="rank">${r.Year}</td>
+                <td class="num">${fmtShort(r.Production_Value)}</td>
+                <td>${r.Unit}</td>
+                ${r.Year >= 2027 ? '<td><span class="forecast-tag">ML Forecast</span></td>' : '<td></td>'}
+            </tr>`;
+        }).join('');
+
+        tEl.innerHTML = `
+            <div class="result-label">${data.crop} · <strong>${data.matched_countries.join(', ')}</strong> · ${data.first_year}–${data.latest_year}</div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Year</th><th>Production</th><th>Unit</th><th>Type</th></tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table></div>`;
+
+        // ── STATS
+        const latestVal = data.latest_production;
+        const peakVal   = data.peak_production;
+        const firstVal  = history[0]?.Production_Value || 0;
+        const growth    = firstVal > 0 ? ((latestVal - firstVal) / firstVal * 100) : null;
+        const trendClass = growth === null ? 'trend-flat' : growth > 5 ? 'trend-up' : growth < -5 ? 'trend-down' : 'trend-flat';
+        const trendLabel = growth === null ? 'Insufficient data' : growth > 5 ? `▲ +${growth.toFixed(1)}%` : growth < -5 ? `▼ ${growth.toFixed(1)}%` : 'Stable';
+
+        sEl.innerHTML = `
+            <div class="stat-row">
+                <div class="stat-card gold"><div class="stat-card-value">${fmtShort(peakVal)}</div><div class="stat-card-label">Peak (${peakYear})</div></div>
+                <div class="stat-card"><div class="stat-card-value">${fmtShort(latestVal)}</div><div class="stat-card-label">Latest (${data.latest_year})</div></div>
+                <div class="stat-card"><div class="stat-card-value">${data.latest_year - data.first_year}y</div><div class="stat-card-label">Span tracked</div></div>
+            </div>
+            <div style="margin-top:1rem;">
+                <div class="field-label" style="margin-bottom:0.4rem;">Overall trend (${data.first_year} → ${data.latest_year})</div>
+                <span class="trend-pill ${trendClass}">${trendLabel}</span>
+            </div>
+            <div style="margin-top:1rem;">
+                <div class="field-label" style="margin-bottom:0.4rem;">Peak vs latest</div>
+                <span class="trend-pill ${latestVal >= peakVal * 0.9 ? 'trend-up' : 'trend-down'}">
+                    ${latestVal >= peakVal * 0.9 ? '▲ Near peak' : '▼ ' + ((1 - latestVal/peakVal)*100).toFixed(1) + '% below peak'}
+                </span>
+            </div>`;
+
+        // ── DECADE BENCHMARKS
+        const decades = {};
+        history.forEach(r => {
+            const d = Math.floor(r.Year / 10) * 10;
+            if (!decades[d]) decades[d] = [];
+            decades[d].push(r.Production_Value);
+        });
+        const decadeRows = Object.entries(decades).map(([d, vals]) => {
+            const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+            const max = Math.max(...vals);
+            return { decade: d, avg, max, count: vals.length };
+        });
+        const maxAvg = Math.max(...decadeRows.map(r => r.avg));
+        const dRowsHtml = decadeRows.map(r => `
+            <tr>
+                <td class="rank">${r.decade}s</td>
+                <td class="num">${fmtShort(r.avg)}</td>
+                <td class="num">${fmtShort(r.max)}</td>
+                <td class="num">${r.count}</td>
+                <td class="share-bar-cell">
+                    <div class="share-bar-wrap">
+                        <div class="share-bar-bg"><div class="share-bar-fill blue" style="width:${Math.min(100,(r.avg/maxAvg)*100).toFixed(1)}%"></div></div>
+                    </div>
+                </td>
+            </tr>`).join('');
+        dEl.innerHTML = `
+            <div class="result-label">Decade averages — ${data.crop} · ${data.matched_countries.join(', ')}</div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Decade</th><th>Avg Production</th><th>Peak in Decade</th><th>Years</th><th>Relative Avg</th></tr></thead>
+                <tbody>${dRowsHtml}</tbody>
+            </table></div>`;
+
+    } catch(e) {
+        [tEl, sEl, dEl].forEach(el => el.innerHTML = `<div class="error-msg">${e.message}</div>`);
+    }
+}
+
+/* ── INIT ─────────────────────────────────────────────────────────────────── */
+async function loadOptions() {
+    ['topCropsBtn','historyBtn'].forEach(id => document.getElementById(id).disabled = true);
+    try {
+        const opts = await getJson('/api/options', {});
+        const yearSel = document.getElementById('yearInput');
+        yearSel.innerHTML = opts.historical_years.map(y => `<option value="${y}"${y===opts.default_year?' selected':''}>${y}</option>`).join('');
+
+        const cropDl = document.getElementById('cropOptions');
+        cropDl.innerHTML = opts.crops.map(c => `<option value="${c}">`).join('');
+        document.getElementById('cropInput').value = opts.default_crop;
+
+        const dl = document.getElementById('countryOptions');
+        dl.innerHTML = opts.countries.map(c => `<option value="${c}">`).join('');
+        document.getElementById('countryInput').value = opts.default_country;
+        document.getElementById('historyCountryInput').value = opts.default_country;
+    } catch(e) { console.error(e); }
+    finally {
+        ['topCropsBtn','historyBtn'].forEach(id => document.getElementById(id).disabled = false);
+    }
+}
+
+// Style focus on text inputs
+['countryInput','historyCountryInput','cropInput'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('focus', () => { el.style.borderColor = 'var(--green-500)'; el.style.boxShadow = '0 0 0 3px rgba(58,134,58,0.12)'; el.style.background = 'var(--surface)'; });
+    el.addEventListener('blur',  () => { el.style.borderColor = ''; el.style.boxShadow = ''; el.style.background = ''; });
+});
+
+document.getElementById('topCropsBtn').addEventListener('click', loadTopCrops);
+document.getElementById('historyBtn').addEventListener('click', loadHistory);
+loadOptions();
+</script>
+</body>
+</html>
