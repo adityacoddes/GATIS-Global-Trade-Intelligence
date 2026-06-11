@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATIS — Forecast Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        /* ML banner */
+        .ml-banner { background: linear-gradient(135deg, var(--green-950) 0%, #1a1200 100%); border: 1px solid rgba(201,168,76,0.25); border-radius: var(--radius-xl); padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+        .ml-banner-icon { font-size: 2.2rem; flex-shrink: 0; }
+        .ml-banner-text h2 { font-size: 1.05rem; font-weight: 600; color: var(--gold); letter-spacing: -0.01em; margin-bottom: 3px; }
+        .ml-banner-text p { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+        .ml-banner-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+        .ml-pill { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 4px 12px; font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; }
+        .ml-pill.gold { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.35); color: var(--gold); }
+
+        /* Two-col layout */
+        .forecast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        @media (max-width: 860px) { .forecast-grid { grid-template-columns: 1fr; } }
+
+        /* SVG timeline chart */
+        .timeline-wrap { width: 100%; overflow-x: auto; }
+        .timeline-svg { display: block; }
+
+        /* Year type indicator */
+        tr.hist-row td:first-child { border-left: 3px solid var(--green-300); }
+        tr.fore-row td:first-child { border-left: 3px solid var(--gold); }
+        tr.fore-row { background: rgba(201,168,76,0.04); }
+
+        /* Comparison table */
+        .comp-tag { display: inline-block; font-size: 10px; font-weight: 600; border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
+        .comp-tag.hist { background: var(--green-50); color: var(--green-700); border: 1px solid var(--green-200); }
+        .comp-tag.fore { background: var(--gold-light); color: #92650a; border: 1px solid rgba(201,168,76,0.5); }
+
+        /* Growth badge */
+        .growth-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+        .growth-pos { background: #dcfce7; color: #166534; }
+        .growth-neg { background: #fef2f2; color: #991b1b; }
+        .growth-neutral { background: var(--surface-3); color: var(--text-muted); }
+
+        /* Forecast map note */
+        .forecast-map-note { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3); border-radius: var(--radius-md); font-size: 12px; color: #92650a; margin-bottom: 1rem; }
+        .forecast-map-note::before { content: '✦'; font-size: 10px; }
+
+        /* Disabled state for no-forecast */
+        .no-forecast-msg { text-align: center; padding: 2rem 1rem; }
+        .no-forecast-msg .nf-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .no-forecast-msg h3 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.4rem; }
+        .no-forecast-msg p { font-size: 0.85rem; color: var(--text-muted); max-width: 340px; margin: 0 auto; line-height: 1.6; }
+        .nf-code { display: inline-block; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 2px 8px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-secondary); margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <a class="topbar-brand" href="index.html">
+        <div class="topbar-logo">G</div>
+        <div>
+            <div class="topbar-name">GATIS</div>
+            <div class="topbar-sub">Global Agricultural Trade Intelligence</div>
+        </div>
+    </a>
+    <nav class="topbar-nav">
+        <a href="index.html">Home</a>
+        <a href="map.html">Global Map</a>
+        <a href="country.html">Country</a>
+        <a href="forecast.html" class="active">Forecast</a>
+    </nav>
+    <div class="topbar-meta">FAOSTAT · 1961–2035</div>
+</header>
+
+<main class="page">
+
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1>Forecast <span>Intelligence</span></h1>
+            <p>ML-projected crop production 2024–2035 · Historical vs. predicted side-by-side · Trajectory analysis</p>
+        </div>
+        <div class="page-badge badge-ml">ML Powered</div>
+    </div>
+
+    <!-- ML MODEL BANNER -->
+    <div class="ml-banner">
+        <div class="ml-banner-icon">🤖</div>
+        <div class="ml-banner-text">
+            <h2>Huber-Regularised Ridge Regression</h2>
+            <p>Trained per country-crop pair on 1961–2023 data. Polynomial time features (Year, Year²) with log-scaling for volatile series. Outlier-robust via Huber loss. Negative predictions clipped to zero.</p>
+        </div>
+        <div class="ml-banner-pills">
+            <span class="ml-pill gold">2024–2035 horizon</span>
+            <span class="ml-pill">HuberRegressor ε=1.35</span>
+            <span class="ml-pill">Degree-2 polynomial</span>
+            <span class="ml-pill">Per-profile model</span>
+        </div>
+    </div>
+
+    <!-- FORECAST CONTROLS -->
+    <div class="section-label">Forecast Query</div>
+    <div class="control-strip">
+        <div class="control-group">
+            <div class="control-label">Country</div>
+            <input id="countryInput" type="text" list="countryOptions" placeholder="e.g. India, Brazil, United States…" style="width:100%;padding:8px 12px;font-size:14px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--surface-2);color:var(--text-primary);outline:none;transition:border-color var(--transition),box-shadow var(--transition);">
+            <datalist id="countryOptions"></datalist>
+        </div>
+        <div class="control-group">
+            <div class="control-label">Crop</div>
+            <select id="cropInput"><option value="">Loading crops…</option></select>
+        </div>
+        <div>
+            <button class="btn btn-gold" id="forecastBtn" type="button" disabled>Run Forecast</button>
+        </div>
+    </div>
+
+    <!-- RESULTS GRID -->
+    <div class="forecast-grid">
+
+        <!-- FORECAST TABLE -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon gold">📈</div>
+                    <div>
+                        <div class="card-title">Projected Production</div>
+                        <div class="card-subtitle">ML forecast values 2024–2035</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="forecastTableResult">
+                <p class="placeholder-msg">Select country &amp; crop, then click Run Forecast.</p>
+            </div>
+        </div>
+
+        <!-- TIMELINE SVG CHART -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-icon gold">📉</div>
+                    <div>
+                        <div class="card-title">Historical vs. Forecast Timeline</div>
+                        <div class="card-subtitle">Full production arc 1961–2035</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="timelineResult">
+                <p class="placeholder-msg">Timeline will render after forecast loads.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDE-BY-SIDE COMPARISON -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-left">
+                <div class="card-icon">⚖️</div>
+                <div>
+                    <div class="card-title">Historical vs. Forecast Comparison</div>
+                    <div class="card-subtitle">Last 5 historical years side-by-side with all 12 forecast years</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" id="comparisonResult">
+            <p class="placeholder-msg">Run a forecast to see the comparison table.</p>
+        </div>
+    </div>
+
+    <!-- FORECAST GLOBAL MAP -->
+    <div class="section-label">Forecast Choropleth Map</div>
+    <div class="control-strip">
+        <div class="control-group">
+            <div class="control-label">Crop (for map)</div>
+            <select id="mapCropInput"><option value="">Loading…</option></select>
+        </div>
+        <div class="control-group narrow">
+            <div class="control-label">Forecast Year</div>
+            <select id="mapYearInput">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="2030" selected>2030</option>
+                <option value="2031">2031</option>
+                <option value="2032">2032</option>
+                <option value="2033">2033</option>
+                <option value="2034">2034</option>
+                <option value="2035">2035</option>
+            </select>
+        </div>
+        <div>
+            <button class="btn btn-gold" id="mapBtn" type="button" disabled>Load Forecast Map</button>
+        </div>
+    </div>
+    <div class="forecast-map-note">Forecast map renders ML-projected production for the selected future year. Values are model estimates, not observed data.</div>
+    <div class="map-card">
+        <div class="map-overlay" id="mapOverlay">
+            <span style="font-size:13px;color:var(--text-hint);">Choose a crop and forecast year, then click Load Forecast Map.</span>
+        </div>
+        <iframe id="mapFrame" title="GATIS forecast map" src="" style="opacity:0;transition:opacity 0.35s ease;"></iframe>
+    </div>
+
+</main>
+
+<footer class="page-footer">GATIS · <span>Forecast Intelligence</span> · ML: HuberRegressor · <a href="index.html" style="color:var(--green-400);">← All modules</a></footer>
+
+<script>
+const API = "http://127.0.0.1:8000";
+const FORECAST_START = 2024;
+const FORECAST_END   = 2035;
+const fmt = v => Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
+const fmtShort = v => {
+    const n = Number(v);
+    if (n >= 1e9) return (n/1e9).toFixed(2)+'B';
+    if (n >= 1e6) return (n/1e6).toFixed(2)+'M';
+    if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+    return fmt(v);
+};
+
+async function getJson(path, params) {
+    const q = new URLSearchParams(params);
+    const res = await fetch(`${API}${path}?${q}`);
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Error ${res.status}`); }
+    return res.json();
+}
+
+/* ── FORECAST QUERY ──────────────────────────────────────────────────────── */
+async function runForecast() {
+    const country = document.getElementById('countryInput').value.trim();
+    const crop    = document.getElementById('cropInput').value;
+    const tEl     = document.getElementById('forecastTableResult');
+    const cEl     = document.getElementById('comparisonResult');
+    const tlEl    = document.getElementById('timelineResult');
+
+    if (!country || !crop) { tEl.innerHTML = '<div class="error-msg">Enter a country and select a crop.</div>'; return; }
+    [tEl, cEl, tlEl].forEach(e => e.innerHTML = `<p class="placeholder-msg"><span class="loading-dots"><span></span><span></span><span></span></span>&nbsp;Loading full history…</p>`);
+
+    try {
+        const data = await getJson('/api/country/crop-history', { country, crop });
+        const history = data.history;
+
+        const histRows   = history.filter(r => r.Year < FORECAST_START);
+        const foreRows   = history.filter(r => r.Year >= FORECAST_START);
+
+        if (foreRows.length === 0) {
+            const nf = `<div class="no-forecast-msg">
+                <div class="nf-icon">🔮</div>
+                <h3>No forecast data found</h3>
+                <p>The <code>forecast_results.csv</code> may not have been generated yet, or this country-crop combination had insufficient historical data.</p>
+                <div class="nf-code">python ml_forecaster.py</div>
+            </div>`;
+            [tEl, cEl, tlEl].forEach(e => e.innerHTML = nf);
+            return;
+        }
+
+        // ── FORECAST TABLE
+        const peakFore = foreRows.reduce((a,b) => a.Production_Value > b.Production_Value ? a : b);
+        const latestHist = histRows[histRows.length - 1];
+        const firstFore  = foreRows[0];
+        const lastFore   = foreRows[foreRows.length - 1];
+
+        const foreHtml = foreRows.map(r => {
+            const isPeak = r.Year === peakFore.Year;
+            return `<tr class="${isPeak ? 'peak-row' : ''}">
+                <td class="rank">${r.Year}${isPeak ? ' ★' : ''}</td>
+                <td class="num forecast-cell">${fmtShort(r.Production_Value)}</td>
+                <td>${r.Unit}</td>
+            </tr>`;
+        }).join('');
+
+        // Growth 2023→2035
+        const growth = latestHist && lastFore ? ((lastFore.Production_Value - latestHist.Production_Value) / (latestHist.Production_Value || 1)) * 100 : null;
+        const growthClass = growth === null ? 'growth-neutral' : growth > 5 ? 'growth-pos' : growth < -5 ? 'growth-neg' : 'growth-neutral';
+        const growthLabel = growth === null ? 'N/A' : (growth > 0 ? '▲ +' : '▼ ') + Math.abs(growth).toFixed(1) + '%';
+
+        tEl.innerHTML = `
+            <div class="stat-row" style="margin-bottom:1rem;">
+                <div class="stat-card gold"><div class="stat-card-value">${fmtShort(peakFore.Production_Value)}</div><div class="stat-card-label">Forecast peak (${peakFore.Year})</div></div>
+                <div class="stat-card"><div class="stat-card-value">${fmtShort(lastFore.Production_Value)}</div><div class="stat-card-label">2035 projection</div></div>
+                <div class="stat-card"><div class="stat-card-value"><span class="growth-badge ${growthClass}">${growthLabel}</span></div><div class="stat-card-label">vs. last historical</div></div>
+            </div>
+            <div class="result-label">Forecast values — ${data.crop} · ${data.matched_countries.join(', ')}</div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Year</th><th>ML Projection</th><th>Unit</th></tr></thead>
+                <tbody>${foreHtml}</tbody>
+            </table></div>`;
+
+        // ── TIMELINE SVG CHART
+        renderTimeline(histRows, foreRows, tlEl, data.crop, data.matched_countries.join(', '));
+
+        // ── COMPARISON TABLE
+        const last5hist = histRows.slice(-5);
+        const compRowsHtml = [
+            ...last5hist.map(r => `<tr class="hist-row">
+                <td class="rank">${r.Year}</td>
+                <td class="num">${fmtShort(r.Production_Value)}</td>
+                <td>${r.Unit}</td>
+                <td><span class="comp-tag hist">Historical</span></td>
+            </tr>`),
+            `<tr><td colspan="4" style="padding:4px 12px;background:var(--surface-3);font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-hint);text-transform:uppercase;">ML Forecast Begins ↓</td></tr>`,
+            ...foreRows.map(r => `<tr class="fore-row">
+                <td class="rank">${r.Year}</td>
+                <td class="num">${fmtShort(r.Production_Value)}</td>
+                <td>${r.Unit}</td>
+                <td><span class="comp-tag fore">ML Forecast</span></td>
+            </tr>`)
+        ].join('');
+
+        cEl.innerHTML = `
+            <div class="result-label">Last 5 historical + all 12 forecast years — ${data.crop} · ${data.matched_countries.join(', ')}</div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Year</th><th>Production</th><th>Unit</th><th>Source</th></tr></thead>
+                <tbody>${compRowsHtml}</tbody>
+            </table></div>`;
+
+    } catch(e) {
+        [tEl, cEl, tlEl].forEach(el => el.innerHTML = `<div class="error-msg">${e.message}</div>`);
+    }
+}
+
+/* ── SVG TIMELINE CHART ──────────────────────────────────────────────────── */
+function renderTimeline(histRows, foreRows, el, crop, country) {
+    const all  = [...histRows, ...foreRows];
+    const vals = all.map(r => r.Production_Value);
+    const yrs  = all.map(r => r.Year);
+    const minV = 0, maxV = Math.max(...vals) * 1.1 || 1;
+    const minY = Math.min(...yrs), maxY = Math.max(...yrs);
+
+    const W = 520, H = 200, PAD_L = 55, PAD_R = 10, PAD_T = 14, PAD_B = 36;
+    const cW = W - PAD_L - PAD_R, cH = H - PAD_T - PAD_B;
+
+    const xOf = y => PAD_L + ((y - minY) / (maxY - minY || 1)) * cW;
+    const yOf = v => PAD_T + cH - ((v - minV) / (maxV - minV || 1)) * cH;
+
+    // Y axis labels
+    const yTicks = 4;
+    let yAxisHtml = '';
+    for (let i = 0; i <= yTicks; i++) {
+        const v = minV + (maxV - minV) * (i / yTicks);
+        const y = yOf(v);
+        yAxisHtml += `<line x1="${PAD_L}" y1="${y}" x2="${W-PAD_R}" y2="${y}" stroke="var(--border)" stroke-width="1"/>
+            <text x="${PAD_L-5}" y="${y+4}" text-anchor="end" font-size="9" fill="var(--text-hint)" font-family="DM Mono,monospace">${fmtShort(v)}</text>`;
+    }
+
+    // X axis ticks (every ~10 years)
+    let xAxisHtml = '';
+    const step = Math.ceil((maxY - minY) / 8 / 10) * 10;
+    for (let y = Math.ceil(minY / 10) * 10; y <= maxY; y += step) {
+        const x = xOf(y);
+        xAxisHtml += `<text x="${x}" y="${H - PAD_B + 14}" text-anchor="middle" font-size="9" fill="var(--text-hint)" font-family="DM Mono,monospace">${y}</text>`;
+    }
+
+    // Historical polyline
+    const histPts = histRows.map(r => `${xOf(r.Year)},${yOf(r.Production_Value)}`).join(' ');
+    // Forecast polyline  (connect from last hist point)
+    const connectPt = histRows.length ? `${xOf(histRows[histRows.length-1].Year)},${yOf(histRows[histRows.length-1].Production_Value)} ` : '';
+    const forePts   = foreRows.map(r => `${xOf(r.Year)},${yOf(r.Production_Value)}`).join(' ');
+
+    // Forecast region background
+    const foreStartX = foreRows.length ? xOf(foreRows[0].Year) : W;
+    const foreRegion = `<rect x="${foreStartX}" y="${PAD_T}" width="${W - PAD_R - foreStartX}" height="${cH}" fill="rgba(201,168,76,0.05)" rx="0"/>`;
+
+    // Divider line at 2024
+    const divX = xOf(FORECAST_START);
+    const divLine = `<line x1="${divX}" y1="${PAD_T}" x2="${divX}" y2="${PAD_T + cH}" stroke="rgba(201,168,76,0.5)" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="${divX+3}" y="${PAD_T+11}" font-size="8" fill="rgba(201,168,76,0.8)" font-family="DM Sans,sans-serif" font-weight="600">FORECAST →</text>`;
+
+    const svg = `<svg class="timeline-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${W}px;">
+        ${foreRegion}
+        ${yAxisHtml}
+        ${xAxisHtml}
+        ${divLine}
+        ${histPts ? `<polyline points="${histPts}" fill="none" stroke="var(--green-400)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+        ${forePts ? `<polyline points="${connectPt}${forePts}" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5,3"/>` : ''}
+        ${histRows.map(r => `<circle cx="${xOf(r.Year)}" cy="${yOf(r.Production_Value)}" r="2" fill="var(--green-500)"/>`).join('')}
+        ${foreRows.map(r => `<circle cx="${xOf(r.Year)}" cy="${yOf(r.Production_Value)}" r="2.5" fill="var(--gold)"/>`).join('')}
+        <!-- Legend -->
+        <line x1="${PAD_L}" y1="${H-10}" x2="${PAD_L+20}" y2="${H-10}" stroke="var(--green-400)" stroke-width="2"/>
+        <text x="${PAD_L+24}" y="${H-6}" font-size="9" fill="var(--text-muted)" font-family="DM Sans,sans-serif">Historical</text>
+        <line x1="${PAD_L+90}" y1="${H-10}" x2="${PAD_L+110}" y2="${H-10}" stroke="var(--gold)" stroke-width="2" stroke-dasharray="4,2"/>
+        <text x="${PAD_L+114}" y="${H-6}" font-size="9" fill="var(--text-muted)" font-family="DM Sans,sans-serif">ML Forecast</text>
+    </svg>`;
+
+    el.innerHTML = `<div class="timeline-wrap">${svg}</div>`;
+}
+
+/* ── FORECAST MAP ────────────────────────────────────────────────────────── */
+function loadForecastMap() {
+    const crop = document.getElementById('mapCropInput').value;
+    const year = document.getElementById('mapYearInput').value;
+    if (!crop || !year) return;
+
+    const frame   = document.getElementById('mapFrame');
+    const overlay = document.getElementById('mapOverlay');
+    frame.style.opacity = '0';
+    overlay.style.display = 'flex';
+    overlay.innerHTML = `<span class="loading-dots"><span></span><span></span><span></span></span><span style="font-size:13px;color:var(--text-hint);">Loading forecast map…</span>`;
+
+    frame.onload = () => { overlay.style.display = 'none'; frame.style.opacity = '1'; };
+    frame.src = `${API}/map?${new URLSearchParams({ crop, year, _: Date.now() })}`;
+}
+
+/* ── INIT ─────────────────────────────────────────────────────────────────── */
+async function loadOptions() {
+    ['forecastBtn','mapBtn'].forEach(id => document.getElementById(id).disabled = true);
+    try {
+        const opts = await getJson('/api/options', {});
+
+        const cropSel = document.getElementById('cropInput');
+        cropSel.innerHTML = opts.crops.map(c => `<option value="${c}"${c===opts.default_crop?' selected':''}>${c}</option>`).join('');
+
+        const mapCropSel = document.getElementById('mapCropInput');
+        mapCropSel.innerHTML = opts.crops.map(c => `<option value="${c}"${c===opts.default_crop?' selected':''}>${c}</option>`).join('');
+
+        const dl = document.getElementById('countryOptions');
+        dl.innerHTML = opts.countries.map(c => `<option value="${c}">`).join('');
+        document.getElementById('countryInput').value = opts.default_country;
+    } catch(e) { console.error(e); }
+    finally {
+        ['forecastBtn','mapBtn'].forEach(id => document.getElementById(id).disabled = false);
+    }
+}
+
+// Text input focus styles
+const ci = document.getElementById('countryInput');
+ci.addEventListener('focus', () => { ci.style.borderColor='var(--green-500)'; ci.style.boxShadow='0 0 0 3px rgba(58,134,58,0.12)'; ci.style.background='var(--surface)'; });
+ci.addEventListener('blur',  () => { ci.style.borderColor=''; ci.style.boxShadow=''; ci.style.background=''; });
+
+document.getElementById('forecastBtn').addEventListener('click', runForecast);
+document.getElementById('mapBtn').addEventListener('click', loadForecastMap);
+loadOptions();
+</script>
+</body>
+</html>

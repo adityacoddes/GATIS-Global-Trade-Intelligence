@@ -2,778 +2,194 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GATIS — Global Agricultural Trade Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATIS — Global Agricultural Trade Intelligence System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         :root {
-            --green-950: #0a1f0a;
-            --green-900: #142814;
-            --green-800: #1c3d1c;
-            --green-700: #245224;
-            --green-600: #2d6a2d;
-            --green-500: #3a863a;
-            --green-400: #52a852;
-            --green-300: #7dc47d;
-            --green-200: #b2dbb2;
-            --green-100: #dff0df;
-            --green-50:  #f2faf2;
-            --gold: #c9a84c;
-            --gold-light: #f5e9c8;
-            --surface: #ffffff;
-            --surface-2: #f7f9f7;
-            --surface-3: #eef4ee;
-            --border: rgba(44, 80, 44, 0.12);
-            --border-strong: rgba(44, 80, 44, 0.22);
-            --text-primary: #0f1f0f;
-            --text-secondary: #3d5c3d;
-            --text-muted: #6b8c6b;
-            --text-hint: #9db59d;
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-            --radius-xl: 22px;
+            --green-950: #0a1f0a; --green-900: #142814; --green-800: #1c3d1c;
+            --green-700: #245224; --green-600: #2d6a2d; --green-500: #3a863a;
+            --green-400: #52a852; --green-300: #7dc47d; --green-200: #b2dbb2;
+            --green-100: #dff0df; --green-50: #f2faf2;
+            --gold: #c9a84c; --gold-light: #f5e9c8;
+            --surface: #ffffff; --surface-2: #f7f9f7; --surface-3: #eef4ee;
+            --border: rgba(44,80,44,0.12); --border-strong: rgba(44,80,44,0.22);
+            --text-primary: #0f1f0f; --text-secondary: #3d5c3d;
+            --text-muted: #6b8c6b; --text-hint: #9db59d;
+            --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-xl: 22px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
-            --shadow-lg: 0 8px 32px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
             --transition: 140ms ease;
         }
-
         html { font-size: 15px; }
-        body {
-            font-family: 'DM Sans', system-ui, sans-serif;
-            background-color: var(--surface-2);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
+        body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--surface-2); color: var(--text-primary); min-height: 100vh; line-height: 1.6; }
 
-        /* ── TOPBAR ── */
-        .topbar {
-            background: var(--green-900);
-            border-bottom: 1px solid var(--green-800);
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 56px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .topbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .topbar-logo {
-            width: 28px;
-            height: 28px;
-            background: var(--gold);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--green-950);
-            letter-spacing: -0.5px;
-        }
-        .topbar-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--green-100);
-            letter-spacing: 0.02em;
-        }
-        .topbar-sub {
-            font-size: 11px;
-            color: var(--green-400);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-        .topbar-meta {
-            font-size: 12px;
-            color: var(--green-400);
-            font-family: 'DM Mono', monospace;
-        }
+        /* TOPBAR */
+        .topbar { background: var(--green-900); border-bottom: 1px solid var(--green-800); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+        .topbar-brand { display: flex; align-items: center; gap: 10px; }
+        .topbar-logo { width: 28px; height: 28px; background: var(--gold); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--green-950); letter-spacing: -0.5px; }
+        .topbar-name { font-size: 14px; font-weight: 600; color: var(--green-100); letter-spacing: 0.02em; }
+        .topbar-sub { font-size: 11px; color: var(--green-400); letter-spacing: 0.08em; text-transform: uppercase; }
+        .topbar-meta { font-size: 12px; color: var(--green-400); font-family: 'DM Mono', monospace; }
 
-        /* ── PAGE WRAPPER ── */
-        .page {
-            max-width: 1160px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 4rem;
-        }
+        /* HERO */
+        .hero-section { background: linear-gradient(160deg, var(--green-950) 0%, var(--green-800) 60%, var(--green-700) 100%); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
+        .hero-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 110%, rgba(201,168,76,0.12) 0%, transparent 70%); pointer-events: none; }
+        .hero-eyebrow { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 5px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-300); margin-bottom: 1.5rem; }
+        .hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); display: block; }
+        .hero-title { font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 600; color: #fff; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 1rem; }
+        .hero-title em { font-style: normal; color: var(--gold); }
+        .hero-desc { font-size: 1.05rem; color: rgba(255,255,255,0.55); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.65; font-weight: 300; }
+        .hero-stats { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; margin-top: 3rem; padding-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
+        .stat { text-align: center; }
+        .stat-num { font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 500; color: #fff; letter-spacing: -0.03em; }
+        .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green-300); margin-top: 2px; }
 
-        /* ── HERO STRIP ── */
-        .hero {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 2rem 0 1.5rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 2rem;
-        }
-        .hero-left h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            line-height: 1.2;
-            letter-spacing: -0.03em;
-        }
-        .hero-left h1 span {
-            color: var(--green-600);
-        }
-        .hero-left p {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-top: 0.35rem;
-        }
-        .hero-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--green-50);
-            border: 1px solid var(--green-200);
-            border-radius: 999px;
-            padding: 6px 14px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--green-700);
-            white-space: nowrap;
-        }
-        .hero-badge::before {
-            content: '';
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--green-500);
-            display: inline-block;
-        }
+        /* NAV GRID */
+        .nav-section { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+        .nav-intro { text-align: center; margin-bottom: 2.5rem; }
+        .nav-intro h2 { font-size: 1.4rem; font-weight: 600; color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+        .nav-intro p { font-size: 0.875rem; color: var(--text-muted); }
 
-        /* ── SECTION LABEL ── */
-        .section-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--text-hint);
-            margin-bottom: 0.75rem;
-        }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
 
-        /* ── CARD ── */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-            margin-bottom: 1.25rem;
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            background: var(--surface);
-        }
-        .card-header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .card-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-sm);
-            background: var(--green-50);
-            border: 1px solid var(--green-200);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-        }
-        .card-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            letter-spacing: -0.01em;
-        }
-        .card-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 1px;
-        }
-        .card-body {
-            padding: 1.25rem 1.5rem;
-        }
+        .module-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition); cursor: pointer; }
+        .module-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: var(--green-200); }
+        .module-card:active { transform: translateY(-1px); }
 
-        /* ── CONTROL STRIP ── */
-        .control-strip {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-sm);
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 1.25rem;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            min-width: 200px;
-        }
-        .control-group.narrow { flex: 0 0 130px; min-width: 130px; }
-        .control-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-        .control-strip select,
-        .card-body select,
-        .card-body input[type="text"] {
-            width: 100%;
-            padding: 8px 12px;
-            font-size: 14px;
-            font-family: 'DM Sans', sans-serif;
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius-md);
-            background: var(--surface-2);
-            color: var(--text-primary);
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-            outline: none;
-            transition: border-color var(--transition), box-shadow var(--transition);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%236b8c6b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 30px;
-        }
-        .card-body input[type="text"] {
-            background-image: none;
-            padding-right: 12px;
-        }
-        .control-strip select:focus,
-        .card-body select:focus,
-        .card-body input[type="text"]:focus {
-            border-color: var(--green-500);
-            box-shadow: 0 0 0 3px rgba(58, 134, 58, 0.12);
-            background-color: var(--surface);
-        }
+        .module-accent { height: 5px; }
+        .accent-map { background: linear-gradient(90deg, var(--green-500), var(--green-300)); }
+        .accent-country { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+        .accent-forecast { background: linear-gradient(90deg, var(--gold), #f5e9c8); }
 
-        /* ── BUTTONS ── */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 18px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'DM Sans', sans-serif;
-            border: none;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            letter-spacing: 0.01em;
-            transition: background var(--transition), transform var(--transition), opacity var(--transition);
-            white-space: nowrap;
-        }
-        .btn-primary {
-            background: var(--green-700);
-            color: #fff;
-        }
-        .btn-primary:hover { background: var(--green-800); }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-secondary {
-            background: var(--surface-3);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-strong);
-        }
-        .btn-secondary:hover { background: var(--green-100); color: var(--green-800); border-color: var(--green-300); }
-        .btn-secondary:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
-        .btn-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        .module-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+        .module-icon { font-size: 2rem; margin-bottom: 1rem; display: block; }
+        .module-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 0.5rem; }
+        .module-title { font-size: 1.15rem; font-weight: 600; color: var(--text-primary); letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+        .module-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; flex: 1; }
+        .module-features { margin-top: 1.2rem; display: flex; flex-direction: column; gap: 6px; }
+        .module-feature { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 7px; }
+        .module-feature::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--green-400); flex-shrink: 0; }
+        .module-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; }
+        .module-cta { font-size: 12px; font-weight: 600; color: var(--green-600); letter-spacing: 0.02em; }
+        .module-arrow { font-size: 14px; color: var(--green-400); transition: transform var(--transition); }
+        .module-card:hover .module-arrow { transform: translateX(4px); }
 
-        /* ── INLINE CONTROLS ROW ── */
-        .inline-controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            margin-bottom: 1.1rem;
-        }
-        .inline-controls .field {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .inline-controls .field.grow { flex: 1; min-width: 180px; }
-        .inline-controls .field.fixed-110 { flex: 0 0 115px; }
-        .field-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
+        .forecast-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold-light); border: 1px solid var(--gold); border-radius: 999px; padding: 3px 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #92650a; text-transform: uppercase; margin-top: 0.75rem; }
+        .forecast-badge::before { content: '✦'; font-size: 8px; }
 
-        /* ── RESULTS ── */
-        .result-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--green-700);
-            padding: 0.5rem 0 0.75rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 0;
-        }
-        .table-wrap {
-            overflow-y: auto;
-            max-height: 300px;
-            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        thead th {
-            position: sticky;
-            top: 0;
-            background: var(--surface-3);
-            color: var(--text-secondary);
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            padding: 9px 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            z-index: 2;
-        }
-        tbody tr { transition: background var(--transition); }
-        tbody tr:hover { background: var(--surface-2); }
-        td {
-            padding: 9px 12px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-primary);
-            font-variant-numeric: tabular-nums;
-        }
-        tbody tr:last-child td { border-bottom: none; }
-        td.rank {
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            color: var(--text-hint);
-            width: 36px;
-        }
-        td.num {
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-        }
-        td.share {
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-        }
-        .share-bar-cell { width: 100px; }
-        .share-bar-wrap { display: flex; align-items: center; gap: 6px; }
-        .share-bar-bg { flex: 1; height: 5px; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
-        .share-bar-fill { height: 100%; background: var(--green-400); border-radius: 999px; }
-        .share-pct { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); min-width: 36px; }
-
-        .placeholder-msg {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 1.5rem 0;
-            font-size: 13px;
-            color: var(--text-hint);
-        }
-        .placeholder-msg::before {
-            content: '';
-            display: block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--green-200);
-            flex-shrink: 0;
-        }
-        .error-msg {
-            font-size: 13px;
-            color: #b91c1c;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: var(--radius-md);
-            padding: 10px 14px;
-        }
-
-        /* ── MAP ── */
-        .map-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-            margin-bottom: 1.25rem;
-            height: 560px;
-        }
-        .map-card iframe { width: 100%; height: 100%; border: none; display: block; }
-
-        /* ── DIVIDER ── */
-        .divider { height: 1px; background: var(--border); margin: 1rem 0; }
-
-        /* ── LOADING ── */
-        .loading-dots { display: inline-flex; gap: 4px; align-items: center; }
-        .loading-dots span {
-            width: 5px; height: 5px; border-radius: 50%;
-            background: var(--green-400);
-            animation: dot-pulse 1.2s ease-in-out infinite;
-        }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes dot-pulse {
-            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-            40% { opacity: 1; transform: scale(1); }
-        }
+        /* FOOTER */
+        .footer { text-align: center; padding: 2rem; font-size: 12px; color: var(--text-hint); border-top: 1px solid var(--border); }
+        .footer span { color: var(--green-400); }
     </style>
 </head>
 <body>
 
-    <!-- TOPBAR -->
-    <header class="topbar">
-        <div class="topbar-brand">
-            <div class="topbar-logo">G</div>
-            <div>
-                <div class="topbar-name">GATIS</div>
-                <div class="topbar-sub">Global Agricultural Trade Intelligence</div>
-            </div>
+<header class="topbar">
+    <div class="topbar-brand">
+        <div class="topbar-logo">G</div>
+        <div>
+            <div class="topbar-name">GATIS</div>
+            <div class="topbar-sub">Global Agricultural Trade Intelligence</div>
         </div>
-        <div class="topbar-meta">FAOSTAT · Interactive Data Engine</div>
-    </header>
+    </div>
+    <div class="topbar-meta">FAOSTAT · 1961–2035</div>
+</header>
 
-    <main class="page">
+<section class="hero-section">
+    <div class="hero-eyebrow">Predictive Intelligence System</div>
+    <h1 class="hero-title">The world's crops,<br><em>decoded</em></h1>
+    <p class="hero-desc">62 years of FAOSTAT production data across 203 countries, now extended to 2035 with machine-learning forecasts.</p>
+    <div class="hero-stats">
+        <div class="stat"><div class="stat-num">203</div><div class="stat-label">Countries</div></div>
+        <div class="stat"><div class="stat-num">600+</div><div class="stat-label">Crop profiles</div></div>
+        <div class="stat"><div class="stat-num">1961–2035</div><div class="stat-label">Time range</div></div>
+        <div class="stat"><div class="stat-num">ML</div><div class="stat-label">Forecasts to 2035</div></div>
+    </div>
+</section>
 
-        <!-- HERO -->
-        <div class="hero">
-            <div class="hero-left">
-                <h1>Agricultural <span>Intelligence</span> Dashboard</h1>
-                <p>Explore global crop production, country profiles, and trade dominance across decades of FAOSTAT data.</p>
-            </div>
-            <div class="hero-badge">Live API</div>
-        </div>
+<section class="nav-section">
+    <div class="nav-intro">
+        <h2>Choose an intelligence module</h2>
+        <p>Each module is purpose-built for a different layer of agricultural analysis.</p>
+    </div>
 
-        <!-- ① COUNTRY INTELLIGENCE -->
-        <div class="section-label">Country Intelligence</div>
-        <div class="card">
-            <div class="card-header">
-                <div class="card-header-left">
-                    <div class="card-icon">🌐</div>
-                    <div>
-                        <div class="card-title">Country Intelligence</div>
-                        <div class="card-subtitle">Top crops by year · Crop production history</div>
-                    </div>
+    <div class="module-grid">
+
+        <!-- MODULE 1: Global Map -->
+        <a class="module-card" href="map.html">
+            <div class="module-accent accent-map"></div>
+            <div class="module-body">
+                <span class="module-icon">🌍</span>
+                <div class="module-tag">Geospatial · Historical</div>
+                <div class="module-title">Global Map Intelligence</div>
+                <div class="module-desc">Visualise crop production dominance across the world as an interactive choropleth. Compare any crop, any year, and see which nations control global supply.</div>
+                <div class="module-features">
+                    <div class="module-feature">Interactive choropleth map</div>
+                    <div class="module-feature">Global production share rankings</div>
+                    <div class="module-feature">Top 10 producer leaderboard</div>
+                    <div class="module-feature">All crops · All years</div>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="inline-controls">
-                    <div class="field grow">
-                        <div class="field-label">Country</div>
-                        <input id="countryInput" type="text" list="countryOptions" placeholder="e.g. India, Brazil, China…">
-                        <datalist id="countryOptions"></datalist>
-                    </div>
-                    <div class="field fixed-110">
-                        <div class="field-label">Year</div>
-                        <select id="countryYearInput">
-                            <option value="">—</option>
-                        </select>
-                    </div>
-                    <div class="btn-row">
-                        <button class="btn btn-primary" id="topCropsButton" type="button">Top Crops</button>
-                        <button class="btn btn-secondary" id="historyButton" type="button">Crop History</button>
-                    </div>
+            <div class="module-footer">
+                <span class="module-cta">Open module</span>
+                <span class="module-arrow">→</span>
+            </div>
+        </a>
+
+        <!-- MODULE 2: Country Intelligence -->
+        <a class="module-card" href="country.html">
+            <div class="module-accent accent-country"></div>
+            <div class="module-body">
+                <span class="module-icon">🌐</span>
+                <div class="module-tag">Country · Profile</div>
+                <div class="module-title">Country Intelligence</div>
+                <div class="module-desc">Deep-dive into any nation's agricultural portfolio. Explore top crops by output, track a single crop's production history, and benchmark performance across decades.</div>
+                <div class="module-features">
+                    <div class="module-feature">Top 10 crops by production value</div>
+                    <div class="module-feature">Full year-by-year crop history</div>
+                    <div class="module-feature">Peak production & trend signals</div>
+                    <div class="module-feature">Searchable across all countries</div>
                 </div>
-                <div id="countryResults">
-                    <p class="placeholder-msg">Enter a country and choose a year to run an intelligence query.</p>
+            </div>
+            <div class="module-footer">
+                <span class="module-cta">Open module</span>
+                <span class="module-arrow">→</span>
+            </div>
+        </a>
+
+        <!-- MODULE 3: ML Forecaster -->
+        <a class="module-card" href="forecast.html">
+            <div class="module-accent accent-forecast"></div>
+            <div class="module-body">
+                <span class="module-icon">📈</span>
+                <div class="module-tag">Machine Learning · Predictive</div>
+                <div class="module-title">Forecast Intelligence</div>
+                <div class="module-desc">Huber-regularised regression models trained on each country-crop pair, projecting production values from 2024 through 2035. Explore what the data predicts for the decade ahead.</div>
+                <div class="module-features">
+                    <div class="module-feature">ML forecasts: 2024–2035</div>
+                    <div class="module-feature">Side-by-side historical vs. predicted</div>
+                    <div class="module-feature">Peak year & trajectory insights</div>
+                    <div class="module-feature">Per country-crop profile</div>
                 </div>
+                <div class="forecast-badge">ML Powered</div>
             </div>
-        </div>
-
-        <!-- ② MAP CONTROLS -->
-        <div class="section-label">Global Map Intelligence</div>
-        <div class="control-strip">
-            <div class="control-group">
-                <div class="control-label">Crop</div>
-                <select id="cropInput">
-                    <option value="">Loading crops…</option>
-                </select>
+            <div class="module-footer">
+                <span class="module-cta">Open module</span>
+                <span class="module-arrow">→</span>
             </div>
-            <div class="control-group narrow">
-                <div class="control-label">Year</div>
-                <select id="yearInput">
-                    <option value="">Loading years…</option>
-                </select>
-            </div>
-            <div style="padding-top: 18px;">
-                <button class="btn btn-primary" id="generateButton" type="button">Generate Map</button>
-            </div>
-        </div>
+        </a>
 
-        <!-- ③ GLOBAL LEADER -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-header-left">
-                    <div class="card-icon">🏆</div>
-                    <div>
-                        <div class="card-title">Global Leader Intelligence</div>
-                        <div class="card-subtitle">Top 10 producers for the selected crop &amp; year</div>
-                    </div>
-                </div>
-                <button class="btn btn-secondary" id="globalLeaderButton" type="button">Find Global Leaders</button>
-            </div>
-            <div id="globalLeaderResults" style="padding: 1rem 1.5rem;">
-                <p class="placeholder-msg">Choose a crop and year in the map controls above, then click Find Global Leaders.</p>
-            </div>
-        </div>
+    </div>
+</section>
 
-        <!-- ④ MAP -->
-        <div class="section-label">Interactive Choropleth Map</div>
-        <div class="map-card">
-            <iframe id="mapFrame" title="GATIS live intelligence map" src="http://127.0.0.1:8000/map?crop=Wheat&year=2020"></iframe>
-        </div>
+<footer class="footer">
+    GATIS · Data source: <span>FAOSTAT</span> · ML forecasts via Huber Regression · Built for agricultural intelligence
+</footer>
 
-    </main>
-
-    <script>
-        const API_BASE_URL = "http://127.0.0.1:8000";
-
-        function buildMapUrl(crop, year) {
-            const params = new URLSearchParams({ crop, year, _: Date.now().toString() });
-            return `${API_BASE_URL}/map?${params.toString()}`;
-        }
-
-        function fmt(value) {
-            return Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 });
-        }
-
-        function renderError(message, targetId = "countryResults") {
-            document.getElementById(targetId).innerHTML = `<div class="error-msg">${message}</div>`;
-        }
-
-        function renderLoading(targetId) {
-            document.getElementById(targetId).innerHTML = `
-                <p class="placeholder-msg" style="gap:10px;">
-                    <span class="loading-dots"><span></span><span></span><span></span></span>
-                    Loading data…
-                </p>`;
-        }
-
-        function renderTable(summary, headers, rows, targetId = "countryResults") {
-            const headerHtml = headers.map(h => `<th>${h.label}</th>`).join("");
-            const maxProd = Math.max(...rows.map(r => Number(r[headers.find(h => h.key === "Production_Value") ? "Production_Value" : "Percentage_Share"] || 0)));
-
-            const rowsHtml = rows.map((row, i) => {
-                const cells = headers.map(h => {
-                    const raw = row[h.key];
-                    const val = h.format ? h.format(raw, row, maxProd) : raw;
-                    return `<td class="${h.cls || ''}">${val ?? ""}</td>`;
-                }).join("");
-                return `<tr>${cells}</tr>`;
-            }).join("");
-
-            document.getElementById(targetId).innerHTML = `
-                <div class="result-label">${summary}</div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>${headerHtml}</tr></thead>
-                        <tbody>${rowsHtml}</tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function updateMap() {
-            const crop = document.getElementById("cropInput").value;
-            const year = document.getElementById("yearInput").value;
-            if (!crop || !year) return;
-            document.getElementById("mapFrame").src = buildMapUrl(crop, year);
-        }
-
-        async function getJson(path, params) {
-            const query = new URLSearchParams(params);
-            const response = await fetch(`${API_BASE_URL}${path}?${query.toString()}`);
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                throw new Error(error.detail || `Request failed with ${response.status}`);
-            }
-            return response.json();
-        }
-
-        async function loadTopCrops() {
-            const country = document.getElementById("countryInput").value.trim();
-            const year = document.getElementById("countryYearInput").value;
-            if (!country || !year) { renderError("Enter a country and choose a year."); return; }
-            renderLoading("countryResults");
-            try {
-                const data = await getJson("/api/country/top-crops", { country, year, limit: 10 });
-                const matched = data.matched_countries.join(", ");
-                const sorted = [...data.top_crops].sort((a, b) => b.Production_Value - a.Production_Value);
-                sorted.forEach((row, i) => { row.Rank = i + 1; });
-                const maxProd = sorted[0]?.Production_Value || 1;
-
-                renderTable(
-                    `Top crops for <strong>${matched}</strong> in ${data.year}`,
-                    [
-                        { key: "Rank", label: "#", cls: "rank" },
-                        { key: "Item", label: "Crop / Product" },
-                        { key: "Production_Value", label: "Production", cls: "num", format: (v) => fmt(v) },
-                        { key: "Unit", label: "Unit" },
-                        {
-                            key: "Country_Share", label: "Share", cls: "share-bar-cell",
-                            format: (v, row, max) => {
-                                const pct = Math.min(100, (Number(row.Production_Value) / maxProd) * 100);
-                                return `<div class="share-bar-wrap"><div class="share-bar-bg"><div class="share-bar-fill" style="width:${pct.toFixed(1)}%"></div></div><span class="share-pct">${fmt(v)}%</span></div>`;
-                            }
-                        }
-                    ],
-                    sorted
-                );
-            } catch (error) { renderError(error.message); }
-        }
-
-        async function loadCropHistory() {
-            const country = document.getElementById("countryInput").value.trim();
-            const crop = document.getElementById("cropInput").value;
-            if (!country || !crop) { renderError("Enter a country and choose a crop in the map controls."); return; }
-            renderLoading("countryResults");
-            try {
-                const data = await getJson("/api/country/crop-history", { country, crop });
-                const matched = data.matched_countries.join(", ");
-                const summary = `${data.crop} · <strong>${matched}</strong> &nbsp;·&nbsp; Latest: ${fmt(data.latest_production)} ${data.latest_unit} (${data.latest_year}) &nbsp;·&nbsp; Peak: ${fmt(data.peak_production)} ${data.peak_unit} (${data.peak_year})`;
-                renderTable(summary,
-                    [
-                        { key: "Year", label: "Year", cls: "rank" },
-                        { key: "Production_Value", label: "Production", cls: "num", format: (v) => fmt(v) },
-                        { key: "Unit", label: "Unit" }
-                    ],
-                    data.history
-                );
-            } catch (error) { renderError(error.message); }
-        }
-
-        function populateSelect(el, values, defaultValue) {
-            el.innerHTML = "";
-            values.forEach(value => {
-                const opt = document.createElement("option");
-                opt.value = value;
-                opt.textContent = value;
-                if (String(value) === String(defaultValue)) opt.selected = true;
-                el.appendChild(opt);
-            });
-        }
-
-        function syncCountryYear() {
-            const mainYear = document.getElementById("yearInput").value;
-            const cy = document.getElementById("countryYearInput");
-            if ([...cy.options].some(o => o.value === mainYear)) cy.value = mainYear;
-        }
-
-        function populateCountryOptions(countries, defaultCountry) {
-            const dl = document.getElementById("countryOptions");
-            dl.innerHTML = "";
-            countries.forEach(c => {
-                const opt = document.createElement("option");
-                opt.value = c;
-                dl.appendChild(opt);
-            });
-            document.getElementById("countryInput").value = defaultCountry;
-        }
-
-        async function loadGlobalLeader() {
-            const crop = document.getElementById("cropInput").value;
-            const year = document.getElementById("yearInput").value;
-            const resultsEl = document.getElementById("globalLeaderResults");
-            if (!crop || !year) { resultsEl.innerHTML = '<div class="error-msg" style="margin:1rem 1.5rem;">Choose a crop and year in the map controls first.</div>'; return; }
-            resultsEl.innerHTML = `<p class="placeholder-msg" style="padding:1rem 0;gap:10px;"><span class="loading-dots"><span></span><span></span><span></span></span>Loading top 10 producers…</p>`;
-            try {
-                const data = await getJson("/api/crop", { name: crop, year });
-                if (!data.data || data.data.length === 0) {
-                    resultsEl.innerHTML = '<div class="error-msg" style="margin:0.5rem 0;">No data found for this crop and year.</div>';
-                    return;
-                }
-                const top10 = data.data.slice(0, 10);
-                const maxShare = top10[0]?.Percentage_Share || 1;
-                const rowsHtml = top10.map((row, i) => `
-                    <tr>
-                        <td class="rank">${i + 1}</td>
-                        <td>${row.Area}</td>
-                        <td class="share-bar-cell">
-                            <div class="share-bar-wrap">
-                                <div class="share-bar-bg"><div class="share-bar-fill" style="width:${((row.Percentage_Share / maxShare) * 100).toFixed(1)}%"></div></div>
-                                <span class="share-pct">${fmt(row.Percentage_Share)}%</span>
-                            </div>
-                        </td>
-                    </tr>
-                `).join("");
-                resultsEl.innerHTML = `
-                    <div class="result-label" style="padding: 0 1.5rem 0.75rem; margin-top: 0.5rem;">Top 10 global producers for <strong>${data.crop}</strong> in ${data.year}</div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>#</th><th>Country</th><th>Global Share</th></tr></thead>
-                            <tbody>${rowsHtml}</tbody>
-                        </table>
-                    </div>
-                `;
-            } catch (error) {
-                resultsEl.innerHTML = `<div class="error-msg" style="margin:1rem 1.5rem;">${error.message}</div>`;
-            }
-        }
-
-        async function loadOptions() {
-            ["generateButton","topCropsButton","historyButton","globalLeaderButton"].forEach(id => {
-                document.getElementById(id).disabled = true;
-            });
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/options`);
-                if (!response.ok) throw new Error(`Options request failed with ${response.status}`);
-                const options = await response.json();
-                populateSelect(document.getElementById("cropInput"), options.crops, options.default_crop);
-                populateSelect(document.getElementById("yearInput"), options.years, options.default_year);
-                populateSelect(document.getElementById("countryYearInput"), options.years, options.default_year);
-                populateCountryOptions(options.countries, options.default_country);
-                updateMap();
-            } catch (error) {
-                document.getElementById("cropInput").innerHTML = '<option value="Wheat">Wheat</option>';
-                document.getElementById("yearInput").innerHTML = '<option value="2020">2020</option>';
-                document.getElementById("countryYearInput").innerHTML = '<option value="2020">2020</option>';
-                document.getElementById("countryInput").value = "India";
-                console.error("Failed to load GATIS options:", error);
-            } finally {
-                ["generateButton","topCropsButton","historyButton","globalLeaderButton"].forEach(id => {
-                    document.getElementById(id).disabled = false;
-                });
-            }
-        }
-
-        document.getElementById("generateButton").addEventListener("click", updateMap);
-        document.getElementById("topCropsButton").addEventListener("click", loadTopCrops);
-        document.getElementById("historyButton").addEventListener("click", loadCropHistory);
-        document.getElementById("globalLeaderButton").addEventListener("click", loadGlobalLeader);
-        document.getElementById("yearInput").addEventListener("change", syncCountryYear);
-        loadOptions();
-    </script>
 </body>
 </html>

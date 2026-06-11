@@ -16,12 +16,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_FILE = BASE_DIR / "cleaned_faostat.csv"
+BASE_DIR      = Path(__file__).resolve().parent
+DATA_FILE     = BASE_DIR / "cleaned_faostat.csv"
+FORECAST_FILE = BASE_DIR / "forecast_results.csv"
 
-print("Loading pre-cleaned dataset into memory...")
+# ── Data loading & merge ──────────────────────────────────────────────────────
+print("Loading historical dataset into memory...")
 df = pd.read_csv(DATA_FILE)
-print(f"API Ready! {len(df)} records loaded.")
+historical_count = len(df)
+print(f"  → {historical_count:,} historical records loaded  (years up to {int(df['Year'].max())})")
+
+if FORECAST_FILE.exists():
+    print("Loading ML forecast results...")
+    forecast_df = pd.read_csv(FORECAST_FILE)
+
+    # Sanity-guard: drop any forecast rows that overlap with historical years
+    # (protects against re-running the forecaster with a different year range)
+    historical_years = set(df["Year"].unique())
+    forecast_df = forecast_df[~forecast_df["Year"].isin(historical_years)]
+
+    df = pd.concat([df, forecast_df], ignore_index=True)
+    forecast_count = len(forecast_df)
+    print(f"  → {forecast_count:,} forecast records merged  (years {int(forecast_df['Year'].min())}–{int(forecast_df['Year'].max())})")
+else:
+    print(
+        f"  ⚠  {FORECAST_FILE.name} not found — running in historical-only mode.\n"
+        f"     Run `python ml_forecaster.py` to generate forecasts."
+    )
+
+print(f"\nAPI Ready! {len(df):,} total records in memory.\n")
+# ─────────────────────────────────────────────────────────────────────────────
 
 CROP_ALIASES = {
     "maize": "Maize (corn)",
@@ -61,6 +85,8 @@ def _format_records(records_df: pd.DataFrame, columns: list[str]) -> list[dict]:
     return records_df[columns].to_dict(orient="records")
 
 
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
 @app.get("/")
 def home():
     return {"status": "online", "message": "GATIS API is live!"}
@@ -68,17 +94,17 @@ def home():
 
 @app.get("/api/options")
 def get_options():
-    crops = sorted(df["Item"].dropna().unique().tolist())
+    crops     = sorted(df["Item"].dropna().unique().tolist())
     countries = sorted(df["Area"].dropna().unique().tolist())
-    years = sorted(df["Year"].dropna().astype(int).unique().tolist(), reverse=True)
+    years     = sorted(df["Year"].dropna().astype(int).unique().tolist(), reverse=True)
 
     return {
-        "default_crop": "Wheat" if "Wheat" in crops else crops[0],
+        "default_crop":    "Wheat" if "Wheat" in crops else crops[0],
         "default_country": "India" if "India" in countries else countries[0],
-        "default_year": years[0],
-        "crops": crops,
-        "countries": countries,
-        "years": years,
+        "default_year":    years[0],
+        "crops":           crops,
+        "countries":       countries,
+        "years":           years,
     }
 
 
@@ -119,9 +145,9 @@ def get_country_profile(name: str, year: int):
     ].to_dict(orient="records")
 
     return {
-        "searched_name": name,
-        "matched_country_entries": matched_countries,
-        "year": year,
+        "searched_name":                  name,
+        "matched_country_entries":        matched_countries,
+        "year":                           year,
         "top_agricultural_contributions": result,
     }
 
@@ -137,7 +163,7 @@ def get_country_top_crops(country: str, year: int, limit: int = 10):
             detail=f"No records found for country matching '{country}' in {year}.",
         )
 
-    limit = max(1, min(limit, 50))
+    limit            = max(1, min(limit, 50))
     total_production = year_df["Production_Value"].sum()
     year_df["Country_Share"] = (year_df["Production_Value"] / total_production) * 100
     top_df = year_df.sort_values(by="Production_Value", ascending=False).head(limit)
@@ -149,12 +175,12 @@ def get_country_top_crops(country: str, year: int, limit: int = 10):
     )
 
     return {
-        "country_query": country,
-        "matched_countries": matched_countries,
-        "year": year,
-        "total_records": int(len(year_df)),
-        "total_production": float(total_production),
-        "top_crops": records,
+        "country_query":      country,
+        "matched_countries":  matched_countries,
+        "year":               year,
+        "total_records":      int(len(year_df)),
+        "total_production":   float(total_production),
+        "top_crops":          records,
     }
 
 
@@ -173,23 +199,23 @@ def get_country_crop_history(country: str, crop: str):
         )
 
     history_df = history_df.sort_values(by="Year")
-    peak_row = history_df.loc[history_df["Production_Value"].idxmax()]
+    peak_row   = history_df.loc[history_df["Production_Value"].idxmax()]
     latest_row = history_df.iloc[-1]
-    first_row = history_df.iloc[0]
-    records = _format_records(history_df, ["Year", "Area", "Item", "Production_Value", "Unit"])
+    first_row  = history_df.iloc[0]
+    records    = _format_records(history_df, ["Year", "Area", "Item", "Production_Value", "Unit"])
 
     return {
-        "country_query": country,
-        "matched_countries": matched_countries,
-        "crop": normalized_crop,
-        "first_year": int(first_row["Year"]),
-        "latest_year": int(latest_row["Year"]),
-        "latest_production": float(latest_row["Production_Value"]),
-        "latest_unit": latest_row["Unit"],
-        "peak_year": int(peak_row["Year"]),
-        "peak_production": float(peak_row["Production_Value"]),
-        "peak_unit": peak_row["Unit"],
-        "history": records,
+        "country_query":          country,
+        "matched_countries":      matched_countries,
+        "crop":                   normalized_crop,
+        "first_year":             int(first_row["Year"]),
+        "latest_year":            int(latest_row["Year"]),
+        "latest_production":      float(latest_row["Production_Value"]),
+        "latest_unit":            latest_row["Unit"],
+        "peak_year":              int(peak_row["Year"]),
+        "peak_production":        float(peak_row["Production_Value"]),
+        "peak_unit":              peak_row["Unit"],
+        "history":                records,
     }
 
 
@@ -203,10 +229,12 @@ def render_live_map(crop: str = "Wheat", year: int = 2020):
             headers={"Cache-Control": "no-store"},
         )
 
-    total_production = crop_df["Production_Value"].sum()
-    crop_df["Percentage_Share"] = (
-        crop_df["Production_Value"] / total_production
-    ) * 100
+    total_production         = crop_df["Production_Value"].sum()
+    crop_df["Percentage_Share"] = (crop_df["Production_Value"] / total_production) * 100
+
+    # Surface a subtle visual cue when the selected year is a forecast year
+    is_forecast = int(year) >= 2024
+    title_suffix = "  ·  ML Forecast" if is_forecast else ""
 
     fig = px.choropleth(
         crop_df,
@@ -215,7 +243,7 @@ def render_live_map(crop: str = "Wheat", year: int = 2020):
         color="Percentage_Share",
         hover_name="Area",
         hover_data={"Percentage_Share": ":.2f"},
-        title=f"Global Market Share: {crop.title()} ({year})",
+        title=f"Global Market Share: {crop.title()} ({year}){title_suffix}",
         color_continuous_scale=px.colors.sequential.YlGnBu,
         labels={"Percentage_Share": "Share (%)"},
     )
