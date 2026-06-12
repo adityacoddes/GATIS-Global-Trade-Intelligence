@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/shared.css">
+    <link rel="stylesheet" href="../static/shared.css">
     <style>
         /* ML banner */
         .ml-banner { background: linear-gradient(135deg, var(--green-950) 0%, #1a1200 100%); border: 1px solid rgba(201,168,76,0.25); border-radius: var(--radius-xl); padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
@@ -57,7 +57,7 @@
 <body>
 
 <header class="topbar">
-    <a class="topbar-brand" href="/">
+    <a class="topbar-brand" href="/frontend/templates/index.html">
         <div class="topbar-logo">G</div>
         <div>
             <div class="topbar-name">GATIS</div>
@@ -65,10 +65,10 @@
         </div>
     </a>
     <nav class="topbar-nav">
-        <a href="/">Home</a>
-        <a href="/map">Global Map</a>
-        <a href="/country">Country</a>
-        <a href="/forecast" class="active">Forecast</a>
+        <a href="/frontend/templates/index.html">Home</a>
+        <a href="/frontend/templates/map.html">Global Map</a>
+        <a href="/frontend/templates/country.html">Country</a>
+        <a href="/frontend/templates/forecast.html" class="active">Forecast</a>
     </nav>
     <div class="topbar-meta">FAOSTAT · 1961–2031</div>
 </header>
@@ -194,7 +194,7 @@
 
 </main>
 
-<footer class="page-footer">GATIS · <span>Forecast Intelligence</span> · ML: HuberRegressor · <a href="/" style="color:var(--green-400);">← All modules</a></footer>
+<footer class="page-footer">GATIS · <span>Forecast Intelligence</span> · ML: HuberRegressor · <a href="/frontend/templates/index.html" style="color:var(--green-400);">← All modules</a></footer>
 
 <script>
 const API = "http://127.0.0.1:8000";

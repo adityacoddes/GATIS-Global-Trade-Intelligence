@@ -1,6 +1,7 @@
 import logging
+from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import plotly.express as px
 import pandas as pd
@@ -17,7 +18,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-templates = Jinja2Templates(directory="frontend/templates")
+# Resolve templates directory absolutely relative to the project root
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "frontend" / "templates"))
 
 # ── Frontend Template Pages ──────────────────────────────────────────────────
 
@@ -26,20 +29,44 @@ def home_page(request: Request):
     """Serves the dashboard home page."""
     return templates.TemplateResponse(request=request, name="index.html")
 
+@router.get("/index.html")
+@router.get("/frontend/templates/index.html")
+def index_html_redirect():
+    """Redirects file-based index.html route to clean path."""
+    return RedirectResponse(url="/", status_code=301)
+
 @router.get("/country", response_class=HTMLResponse)
 def country_page(request: Request):
     """Serves the country profile page."""
     return templates.TemplateResponse(request=request, name="country.html")
+
+@router.get("/country.html")
+@router.get("/frontend/templates/country.html")
+def country_html_redirect():
+    """Redirects file-based country.html route to clean path."""
+    return RedirectResponse(url="/country", status_code=301)
 
 @router.get("/forecast", response_class=HTMLResponse)
 def forecast_page(request: Request):
     """Serves the forecast page."""
     return templates.TemplateResponse(request=request, name="forecast.html")
 
+@router.get("/forecast.html")
+@router.get("/frontend/templates/forecast.html")
+def forecast_html_redirect():
+    """Redirects file-based forecast.html route to clean path."""
+    return RedirectResponse(url="/forecast", status_code=301)
+
 @router.get("/map", response_class=HTMLResponse)
 def map_page(request: Request):
     """Serves the global interactive map page."""
     return templates.TemplateResponse(request=request, name="map.html")
+
+@router.get("/map.html")
+@router.get("/frontend/templates/map.html")
+def map_html_redirect():
+    """Redirects file-based map.html route to clean path."""
+    return RedirectResponse(url="/map", status_code=301)
 
 # ── API Endpoints ─────────────────────────────────────────────────────────────
 

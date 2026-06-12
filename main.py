@@ -29,9 +29,12 @@ app = FastAPI(
 )
 
 
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
+
 app.mount(
     "/static",
-    StaticFiles(directory="frontend/static"),
+    StaticFiles(directory=str(BASE_DIR / "frontend" / "static")),
     name="static"
 )
 

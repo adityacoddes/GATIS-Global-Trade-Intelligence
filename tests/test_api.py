@@ -94,5 +94,28 @@ class TestGatisAPI(unittest.TestCase):
             response = self.client.get(f"/map/embed?crop=Wheat&year={y}")
             self.assertEqual(response.status_code, 400)
 
+    def test_html_redirects(self):
+        """Verifies that requests to .html routes are redirected to their clean routes."""
+        redirect_map = {
+            "/index.html": "/",
+            "/country.html": "/country",
+            "/forecast.html": "/forecast",
+            "/map.html": "/map",
+            "/frontend/templates/index.html": "/",
+            "/frontend/templates/country.html": "/country",
+            "/frontend/templates/forecast.html": "/forecast",
+            "/frontend/templates/map.html": "/map"
+        }
+        for path, target in redirect_map.items():
+            response = self.client.get(path, follow_redirects=False)
+            self.assertEqual(response.status_code, 301)
+            self.assertEqual(response.headers["location"], target)
+
+    def test_static_file_serving(self):
+        """Checks if static files (shared.css) are served correctly with 200 OK."""
+        response = self.client.get("/static/shared.css")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/css", response.headers["content-type"])
+
 if __name__ == "__main__":
     unittest.main()
