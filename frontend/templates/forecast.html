@@ -422,7 +422,15 @@ async function loadOptions() {
 ['countryInput', 'cropInput', 'mapCropInput'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-        el.addEventListener('focus', () => { el.style.borderColor='var(--green-500)'; el.style.boxShadow='0 0 0 3px rgba(58,134,58,0.12)'; el.style.background='var(--surface)'; });
+        el.addEventListener('focus', () => { 
+            el.style.borderColor='var(--green-500)'; 
+            el.style.boxShadow='0 0 0 3px rgba(58,134,58,0.12)'; 
+            el.style.background='var(--surface)'; 
+            try { el.showPicker(); } catch (err) {}
+        });
+        el.addEventListener('click', () => {
+            try { el.showPicker(); } catch (err) {}
+        });
         el.addEventListener('blur',  () => { el.style.borderColor=''; el.style.boxShadow=''; el.style.background=''; });
     }
 });

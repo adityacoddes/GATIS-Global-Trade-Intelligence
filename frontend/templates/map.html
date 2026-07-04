@@ -286,7 +286,15 @@ document.getElementById('generateButton').addEventListener('click', updateMap);
 document.getElementById('globalLeaderButton').addEventListener('click', () => { updateMap(); loadGlobalLeaders(); });
 // Style focus on text inputs
 const cropIn = document.getElementById('cropInput');
-cropIn.addEventListener('focus', () => { cropIn.style.borderColor = 'var(--green-500)'; cropIn.style.boxShadow = '0 0 0 3px rgba(58,134,58,0.12)'; cropIn.style.background = 'var(--surface)'; });
+cropIn.addEventListener('focus', () => { 
+    cropIn.style.borderColor = 'var(--green-500)'; 
+    cropIn.style.boxShadow = '0 0 0 3px rgba(58,134,58,0.12)'; 
+    cropIn.style.background = 'var(--surface)'; 
+    try { cropIn.showPicker(); } catch (err) {}
+});
+cropIn.addEventListener('click', () => {
+    try { cropIn.showPicker(); } catch (err) {}
+});
 cropIn.addEventListener('blur',  () => { cropIn.style.borderColor = ''; cropIn.style.boxShadow = ''; cropIn.style.background = ''; });
 
 loadOptions();
