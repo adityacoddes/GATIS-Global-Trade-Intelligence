@@ -9,6 +9,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_FILE = BASE_DIR / "data" / "processed" / "cleaned_faostat.csv"
 FORECAST_FILE = BASE_DIR / "data" / "forecasts" / "forecast_results.csv"
 
+CATEGORICAL_COLS = {
+    "Area": "category",
+    "Item Code (CPC)": "category",
+    "Item": "category",
+    "Element": "category",
+    "Unit": "category",
+    "ISO3": "category",
+    "Area Code (M49)": "category"
+}
+
 # Global data frames populated at startup
 _df_historical: pd.DataFrame = pd.DataFrame()
 _df_forecast: pd.DataFrame = pd.DataFrame()
@@ -25,7 +35,7 @@ def load_all_data() -> None:
         raise FileNotFoundError(f"Historical data file missing at: {DATA_FILE}")
 
     try:
-        df_hist = pd.read_csv(DATA_FILE)
+        df_hist = pd.read_csv(DATA_FILE, dtype=CATEGORICAL_COLS)
         # Filter strictly <= 2023 and drop any invalid intermediate years
         df_hist = df_hist[df_hist["Year"] <= LAST_ACTUAL_YEAR]
         df_hist = df_hist[~df_hist["Year"].isin(INVALID_YEARS)]
@@ -40,7 +50,7 @@ def load_all_data() -> None:
         raise FileNotFoundError(f"Forecast data file missing at: {FORECAST_FILE}")
 
     try:
-        df_fore = pd.read_csv(FORECAST_FILE)
+        df_fore = pd.read_csv(FORECAST_FILE, dtype=CATEGORICAL_COLS)
         # Filter strictly inside allowed forecast years and exclude invalid intermediate years
         df_fore = df_fore[(df_fore["Year"] >= FORECAST_START_YEAR) & (df_fore["Year"] <= FORECAST_END_YEAR)]
         df_fore = df_fore[~df_fore["Year"].isin(INVALID_YEARS)]
