@@ -1,0 +1,26 @@
+# Git
+.git
+.github
+.gitignore
+
+# Environments
+.venv
+venv
+ENV
+env
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing & logs
+.pytest_cache/
+tests/
+*.log
+
+# Docker
+Dockerfile
+.dockerignore
