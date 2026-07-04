@@ -197,7 +197,7 @@
 <footer class="page-footer">GATIS · <span>Forecast Intelligence</span> · ML: HuberRegressor · <a href="/frontend/templates/index.html" style="color:var(--green-400);">← All modules</a></footer>
 
 <script>
-const API = "http://127.0.0.1:8000";
+const API = window.location.origin;
 const FORECAST_START = 2027;
 const FORECAST_END   = 2031;
 const fmt = v => Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
